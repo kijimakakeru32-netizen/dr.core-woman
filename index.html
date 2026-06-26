@@ -63,9 +63,9 @@
       img { width: 100%; display: block; }
       a { color: inherit; }
       .site {
-        width: min(100%, 430px);
-        max-width: 430px;
-        margin: 0 auto;
+        width: 100%;
+        max-width: none;
+        margin: 0;
         background: var(--bg);
         min-height: 100vh;
         overflow: hidden;
@@ -73,9 +73,10 @@
       .header {
         position: fixed;
         top: 0;
-        left: 50%;
-        transform: translateX(-50%);
-        width: min(100%, 430px);
+        left: 0;
+        right: 0;
+        transform: none;
+        width: 100%;
         z-index: 50;
         min-height: 58px;
         display: flex;
@@ -1961,8 +1962,8 @@
       };
       const label = document.getElementById('monthLabel'), dates = document.getElementById('calendarDates'), timeButtons = document.getElementById('timeButtons');
       const localIso = day => `${day.getFullYear()}-${String(day.getMonth()+1).padStart(2,'0')}-${String(day.getDate()).padStart(2,'0')}`;
-      function renderTimes(){ timeButtons.innerHTML=''; const slots=availableSlots[state.date] || []; if(!slots.length){ const p=document.createElement('p'); p.className='small'; p.textContent='日付を選択してください。'; timeButtons.append(p); return; } slots.forEach(slot=>{ const btn=document.createElement('button'); btn.type='button'; btn.className='time'; const [start,end] = slot.split('〜'); btn.innerHTML=`<span class="time-main">${start}〜${end}</span><span class="time-sub">60分の体験レッスン</span>`; if(state.time===slot) btn.classList.add('selected'); btn.onclick=()=>{ state.time=slot; renderTimes(); }; timeButtons.append(btn); }); }
-      function renderCal(){ const y=now.getFullYear(), m=now.getMonth()+state.offset, first=new Date(y,m,1), last=new Date(y,m+1,0); label.textContent=`${first.getFullYear()}年${first.getMonth()+1}月`; dates.innerHTML=''; for(let i=0;i<first.getDay();i++) dates.append(document.createElement('div')); for(let d=1; d<=last.getDate(); d++){ const day=new Date(first.getFullYear(),first.getMonth(),d), b=document.createElement('button'); b.type='button'; b.className='date'; b.textContent=d; const iso=localIso(day); const ok=Boolean(availableSlots[iso]); b.disabled=!ok; if(ok) b.classList.add('available'); if(state.date===iso) b.classList.add('selected'); b.onclick=()=>{state.date=iso; state.time=''; renderCal(); renderTimes();}; dates.append(b);} document.getElementById('prevMonth').disabled=state.offset===0; document.getElementById('nextMonth').disabled=state.offset===1; }
+      function renderTimes(){ timeButtons.innerHTML=''; const slots=availableSlots[state.date] || []; if(slots.length===1 && !state.time) state.time=slots[0]; if(!slots.length){ const p=document.createElement('p'); p.className='small'; p.textContent='日付を選択してください。'; timeButtons.append(p); return; } slots.forEach(slot=>{ const btn=document.createElement('button'); btn.type='button'; btn.className='time'; const [start,end] = slot.split('〜'); btn.innerHTML=`<span class="time-main">${start}〜${end}</span><span class="time-sub">60分の体験レッスン</span>`; if(state.time===slot) btn.classList.add('selected'); btn.onclick=()=>{ state.time=slot; renderTimes(); }; timeButtons.append(btn); }); }
+      function renderCal(){ const y=now.getFullYear(), m=now.getMonth()+state.offset, first=new Date(y,m,1), last=new Date(y,m+1,0); label.textContent=`${first.getFullYear()}年${first.getMonth()+1}月`; dates.innerHTML=''; for(let i=0;i<first.getDay();i++) dates.append(document.createElement('div')); for(let d=1; d<=last.getDate(); d++){ const day=new Date(first.getFullYear(),first.getMonth(),d), b=document.createElement('button'); b.type='button'; b.className='date'; b.textContent=d; const iso=localIso(day); const ok=Boolean(availableSlots[iso]); b.disabled=!ok; if(ok) b.classList.add('available'); if(state.date===iso) b.classList.add('selected'); b.onclick=()=>{state.date=iso; state.time=''; const slots=availableSlots[iso] || []; if(slots.length===1) state.time=slots[0]; renderCal(); renderTimes();}; dates.append(b);} document.getElementById('prevMonth').disabled=state.offset===0; document.getElementById('nextMonth').disabled=state.offset===1; }
       document.getElementById('prevMonth').onclick=()=>{ if(state.offset>0){state.offset--; renderCal();} };
       document.getElementById('nextMonth').onclick=()=>{ if(state.offset<1){state.offset++; renderCal();} };
       document.getElementById('reserveForm').onsubmit = e => {
